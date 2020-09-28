@@ -1,0 +1,5 @@
+*.py[co]
+*.sw[po]
+*~
+/secrets.json
+gpconsole/secrets.json
