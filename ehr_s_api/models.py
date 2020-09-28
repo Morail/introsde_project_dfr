@@ -36,7 +36,6 @@ class ParanoidModel(models.Model):
     original_objects = models.Manager()
 
     def delete(self):
-        print("HURRAH!")
         self.deleted_on = timezone.now()
         self.save()
 
@@ -79,6 +78,7 @@ class Measurement(ParanoidModel):
                             choices=UnitOfMeasurement.choices,
                             default="",
                             null=True)
+    note =  models.CharField(max_length=500,blank=True,null=True)
     date = models.DateTimeField()
 
     def __str__(self):
@@ -88,9 +88,6 @@ class Measurement(ParanoidModel):
 class Disease(ParanoidModel):
     name = models.CharField(max_length=60)
     icd_code = models.CharField(max_length=60)
-
-    def __str__(self):
-        return self.name
 
 
 class PatientDisease(ParanoidModel):

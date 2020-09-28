@@ -1,5 +1,6 @@
+from django.http.response import JsonResponse
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 
@@ -75,3 +76,12 @@ class DrugList(viewsets.ModelViewSet):
 class PatientDiseaseList(viewsets.ModelViewSet):
     queryset = PatientDisease.objects.all().order_by('id')
     serializer_class = PatientDiseaseSerializer
+
+    def post(self, request, format=None):
+        print(request)
+        print(request.data)
+        serializer = PatientDisease(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

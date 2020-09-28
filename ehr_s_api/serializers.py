@@ -3,20 +3,19 @@ from rest_framework import serializers
 from .models import Patient, PatientDisease, Drug, Prescription, Disease, Measurement
 
 
-class PatientSerializer(serializers.HyperlinkedModelSerializer):
-
+class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = ('id', 'uuid', 'last_name', 'first_name', 'tax_code', 'birth_date', 'entry_date', 'expiry_date', )
+        fields = ('id', 'uuid', 'last_name', 'first_name', 'tax_code', 'birth_date', 'entry_date', 'expiry_date',)
 
 
-class DrugSerializer(serializers.HyperlinkedModelSerializer):
+class DrugSerializer(serializers.ModelSerializer):
     class Meta:
         model = Drug
         fields = ('id', 'name', 'substance_name', 'product_type', 'brand_name', 'dosage_form',)
 
 
-class PrescriptionSerializer(serializers.HyperlinkedModelSerializer):
+class PrescriptionSerializer(serializers.ModelSerializer):
     patient = PatientSerializer()
     drug = DrugSerializer()
 
@@ -25,7 +24,7 @@ class PrescriptionSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'patient', 'drug', 'start_date', 'end_date', 'note',)
 
 
-class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
+class MeasurementSerializer(serializers.ModelSerializer):
     patient = PatientSerializer()
 
     class Meta:
@@ -33,20 +32,18 @@ class MeasurementSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'patient', 'type', 'value', 'unit')
 
 
-class DiseaseSerializer(serializers.HyperlinkedModelSerializer):
-
+class DiseaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Disease
         fields = ('id', 'name', 'icd_code',)
 
 
-class PatientDiseaseSerializer(serializers.HyperlinkedModelSerializer):
-    patient = PatientSerializer()
-    disease = DiseaseSerializer()
-
+class PatientDiseaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientDisease
-        fields = ('patient', 'disease', 'start_date', 'end_date', )
+        fields = ('patient', 'disease', 'start_date', 'end_date',)
 
-
-
+    def to_representation(self, instance):
+        self.fields['patient'] = PatientSerializer(read_only=True)
+        self.fields['disease'] = DiseaseSerializer(read_only=True)
+        return super(PatientDiseaseSerializer, self).to_representation(instance)
