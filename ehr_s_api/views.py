@@ -5,14 +5,9 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 
 # Create your views here.
-from .serializers import PatientSerializer, PrescriptionSerializer, DrugSerializer, PatientDiseaseSerializer
+from .serializers import *
 from .models import Patient, PatientDisease, Drug, Prescription, Disease, Measurement
 
-
-# class PatientViewSet(viewsets.ModelViewSet):
-# queryset = Patient.objects.all().order_by('last_name')
-# serializer_class = PatientSerializer
-# filter_fields = ('first_name','last_name','tax_code')
 
 class PatientList(viewsets.ModelViewSet):
 
@@ -41,6 +36,17 @@ class PatientList(viewsets.ModelViewSet):
         queryset = PatientDiseaseSerializer.objects.all()
         queryset = queryset.filter(patient__id=pk)
         serializer = PatientDiseaseSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def measurements(self, request, pk=None):
+        """
+        Returns a list of all the measurements for the given user
+        """
+        user = self.get_object()
+        queryset = Measurement.objects.all()
+        queryset = queryset.filter(patient__id=pk)
+        serializer = MeasurementSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -78,9 +84,19 @@ class PatientDiseaseList(viewsets.ModelViewSet):
     serializer_class = PatientDiseaseSerializer
 
     def post(self, request, format=None):
-        print(request)
-        print(request.data)
         serializer = PatientDisease(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MeasurementList(viewsets.ModelViewSet):
+    queryset = Measurement.objects.all().order_by('id')
+    serializer_class = MeasurementSerializer
+
+    def post(self, request, format=None):
+        serializer = Measurement(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)

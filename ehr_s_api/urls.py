@@ -8,6 +8,7 @@ router.register(r'patients', views.PatientList, basename='Patient')
 router.register(r'drugs', views.DrugList, basename='Drug')
 router.register(r'prescriptions', views.PrescriptionList, basename='Prescription')
 router.register(r'patient_diseases', views.PatientDiseaseList, basename='Patient diseases')
+router.register(r'measurements', views.MeasurementList, basename='Measurement')
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

@@ -78,8 +78,10 @@ class Measurement(ParanoidModel):
                             choices=UnitOfMeasurement.choices,
                             default="",
                             null=True)
-    note =  models.CharField(max_length=500,blank=True,null=True)
-    date = models.DateTimeField()
+    note = models.CharField(max_length=500,
+                            blank=True,
+                            null=True)
+    date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return 'Measurement for patient id %d -> type: %s - value: %s' % (self.patient.id, self.type, self.value,)
@@ -88,6 +90,9 @@ class Measurement(ParanoidModel):
 class Disease(ParanoidModel):
     name = models.CharField(max_length=60)
     icd_code = models.CharField(max_length=60)
+
+    def __str__(self):
+        return '%s - %s' % (self.name, self.icd_code,)
 
 
 class PatientDisease(ParanoidModel):
@@ -114,8 +119,7 @@ class Drug(ParanoidModel):
 class Prescription(ParanoidModel):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     drug = models.ForeignKey(Drug, on_delete=models.CASCADE, null=True)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField(blank=True, null=True)
+    start_date = models.DateTimeField(default=timezone.now)
     diagnostic_question = models.CharField(max_length=2000, null=True)
     note = models.CharField(max_length=200)
 

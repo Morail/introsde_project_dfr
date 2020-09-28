@@ -16,20 +16,24 @@ class DrugSerializer(serializers.ModelSerializer):
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer()
-    drug = DrugSerializer()
-
     class Meta:
         model = Prescription
-        fields = ('id', 'patient', 'drug', 'start_date', 'end_date', 'note',)
+        fields = ('id', 'patient', 'drug', 'start_date', 'note',)
+
+    def to_representation(self, instance):
+        self.fields['patient'] = PatientSerializer(read_only=True)
+        self.fields['drug'] = DrugSerializer(read_only=True)
+        return super(PrescriptionSerializer, self).to_representation(instance)
 
 
 class MeasurementSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer()
-
     class Meta:
         model = Measurement
-        fields = ('id', 'patient', 'type', 'value', 'unit')
+        fields = ('id', 'patient', 'type', 'value', 'unit', 'note', 'date')
+
+    def to_representation(self, instance):
+        self.fields['patient'] = PatientSerializer(read_only=True)
+        return super(MeasurementSerializer, self).to_representation(instance)
 
 
 class DiseaseSerializer(serializers.ModelSerializer):
