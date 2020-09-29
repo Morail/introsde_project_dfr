@@ -18,7 +18,7 @@ class DrugSerializer(serializers.ModelSerializer):
 class PrescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prescription
-        fields = ('id', 'patient', 'drug', 'start_date', 'note',)
+        fields = ('id', 'patient', 'drug', 'date', 'note',)
 
     def to_representation(self, instance):
         self.fields['patient'] = PatientSerializer(read_only=True)

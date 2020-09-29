@@ -119,7 +119,7 @@ class Drug(ParanoidModel):
 class Prescription(ParanoidModel):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     drug = models.ForeignKey(Drug, on_delete=models.CASCADE, null=True)
-    start_date = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now)
     diagnostic_question = models.CharField(max_length=2000, null=True)
     note = models.CharField(max_length=200)
 
