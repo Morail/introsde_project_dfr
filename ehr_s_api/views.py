@@ -1,3 +1,6 @@
+import time
+
+import requests
 from django.conf.urls import url
 from django.http.response import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -7,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 
 # Create your views here.
+from rest_framework.views import APIView
+
 from .serializers import *
 from .models import Patient, PatientDisease, Drug, Prescription, Disease, Measurement
 
@@ -80,7 +85,74 @@ class DrugList(viewsets.ModelViewSet):
         if s_name is not None:
             queryset = queryset.filter(substance_name=s_name)
 
+        precautions = 'PIPPO'
+
         return queryset
+
+    """
+    List results retrieved from api.fda.gov.
+    """
+
+    @action(detail=True)
+    def openfda(self, request, pk=None):
+        """
+        Returns a list of all the measurements for the given user
+        """
+        drug = self.get_object()
+        base_uri = 'https://api.fda.gov:443/drug/label.json'
+        search_string = 'openfda.generic_name:"' + drug.substance_name + '"+AND+openfda.brand_name:"' + drug.brand_name + '"'
+        query_string = '%s?%s=%s&%s=%d' % (base_uri, 'search', search_string, 'limit', 1)
+
+        attempt_num = 0  # keep track of how many times we've retried
+        while attempt_num < 2:
+            r = requests.get(
+                query_string,
+                timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                attempt_num += 1
+                # You can probably use a logger to log the error here
+                time.sleep(5)  # Wait for 5 seconds before re-trying
+        return Response({"error": "Request failed - " + query_string}, status=r.status_code)
+
+    def create(self, request, format=None):
+
+        base_uri = 'https://api.fda.gov:443/drug/label.json'
+        search_string = 'openfda.generic_name:"' + request.data.get('substance_name') + '"+AND+openfda.brand_name:"' + request.data.get('brand_name') + '"'
+        query_string = '%s?%s=%s&%s=%d' % (base_uri, 'search', search_string, 'limit', 1)
+
+        attempt_num = 0  # keep track of how many times we've retried
+        found = False
+        while attempt_num < 2 and found is False:
+            r = requests.get(
+                query_string,
+                timeout=10)
+            if r.status_code == 200:
+                res = r.json()
+                manufacter_name = res['results'][0]['openfda']['manufacturer_name'][0]
+                precautions = str(res['results'][0]['precautions'][0])[:4999]
+                drug_interactions = str(res['results'][0]['drug_interactions'][0])[:4999]
+                found = True
+            else:
+                attempt_num += 1
+                # You can probably use a logger to log the error here
+                time.sleep(2)  # Wait for 5 seconds before re-trying
+
+        if found is True:
+            request.data.update({"manufacter_name": manufacter_name,
+                                 'precautions': precautions,
+                                 'drug_interactions': drug_interactions}
+                                )
+
+        serializer = DrugSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PatientDiseaseList(viewsets.ModelViewSet):

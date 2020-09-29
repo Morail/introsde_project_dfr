@@ -108,14 +108,17 @@ class PatientDisease(ParanoidModel):
 
 
 class Drug(ParanoidModel):
-    name = models.CharField(max_length=60)
+    generic_name = models.CharField(max_length=60)
     substance_name = models.CharField(max_length=60)
     product_type = models.CharField(max_length=60)
     brand_name = models.CharField(max_length=60)
     dosage_form = models.CharField(max_length=60)
+    drug_interactions = models.TextField(blank=True, null=True, max_length=5000)
+    precautions = models.TextField(blank=True, null=True, max_length=5000)
+    manufacter_name = models.CharField(max_length=60)
 
     def __str__(self):
-        return self.name
+        return self.generic_name
 
 
 class Prescription(ParanoidModel):
