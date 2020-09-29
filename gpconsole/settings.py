@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import json
 import os
+
+import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -54,7 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ehr_s_api.apps.EhrSApiConfig',
     'rest_framework',
-    #'rest_framework.authtoken',
+    'rest_framework_swagger',
     'djoser',
     'django_filters'
 ]
@@ -98,6 +100,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
+    #'default': dj_database_url.config(default=getSecrets('POSTGRES_URL'))
 }
 
 

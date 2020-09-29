@@ -1,4 +1,6 @@
+from django.conf.urls import url
 from django.http.response import JsonResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
@@ -54,12 +56,14 @@ class PrescriptionList(viewsets.ModelViewSet):
     """
     Return a list of all the existing prescriptions.
     """
-
     queryset = Prescription.objects.all().order_by('id')
     serializer_class = PrescriptionSerializer
 
 
 class DrugList(viewsets.ModelViewSet):
+    """
+    Return a list of all the existing drugs.
+    """
     queryset = Drug.objects.all().order_by('id')
     serializer_class = DrugSerializer
 
@@ -82,6 +86,7 @@ class DrugList(viewsets.ModelViewSet):
 class PatientDiseaseList(viewsets.ModelViewSet):
     queryset = PatientDisease.objects.all().order_by('id')
     serializer_class = PatientDiseaseSerializer
+    filter_fields = ['disease__name', 'start_date']
 
     def post(self, request, format=None):
         serializer = PatientDisease(data=request.data)
@@ -94,6 +99,23 @@ class PatientDiseaseList(viewsets.ModelViewSet):
 class MeasurementList(viewsets.ModelViewSet):
     queryset = Measurement.objects.all().order_by('id')
     serializer_class = MeasurementSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['type', 'date']
+
+    def get_queryset(self):
+        queryset = Measurement.objects.all()
+
+        # type
+        type = self.request.query_params.get('type', None)
+        if type is not None:
+            queryset = queryset.filter(type=type)
+
+        # dateFrom
+        date_from = self.request.query_params.get('dateFrom', None)
+        if date_from is not None:
+            queryset = queryset.filter(date__lt=date_from)
+
+        return queryset
 
     def post(self, request, format=None):
         serializer = Measurement(data=request.data)

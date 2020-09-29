@@ -16,7 +16,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+# Create our schema's view w/ the get_schema_view() helper method. Pass in the proper Renderers for swagger
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.renderers import CoreJSONRenderer
+from rest_framework.schemas import get_schema_view
+from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
+
+# generate swagger
+#schema_view = get_schema_view(title='Users API', renderer_classes=[CoreJSONRenderer, OpenAPIRenderer, SwaggerUIRenderer])
+
+# Inlcude the schema view in our urls.
 urlpatterns = [
+    #path('docs/', schema_view, name="docs"),
     path('admin/', admin.site.urls),
     path('api/ehr-s-api/', include('ehr_s_api.urls')),
     path('api/auth/', include('djoser.urls.authtoken')),

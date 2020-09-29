@@ -4,6 +4,8 @@ from django.db import models
 from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 
+import django_filters
+
 
 class ParanoidQuerySet(QuerySet):
     """
