@@ -119,32 +119,34 @@ class DrugList(viewsets.ModelViewSet):
 
     def create(self, request, format=None):
 
-        base_uri = 'https://api.fda.gov:443/drug/label.json'
-        search_string = 'openfda.generic_name:"' + request.data.get('substance_name') + '"+AND+openfda.brand_name:"' + request.data.get('brand_name') + '"'
-        query_string = '%s?%s=%s&%s=%d' % (base_uri, 'search', search_string, 'limit', 1)
+        search_string = 'openfda.generic_name:"' + request.data.get(
+            'substance_name') + '"+AND+openfda.brand_name:"' + request.data.get('brand_name') + '"'
 
-        attempt_num = 0  # keep track of how many times we've retried
-        found = False
-        while attempt_num < 2 and found is False:
-            r = requests.get(
-                query_string,
-                timeout=10)
-            if r.status_code == 200:
-                res = r.json()
+        res = OpenFDAView(search_string)
+
+        manufacter_name = ""
+        precautions= ""
+        drug_interactions = ""
+
+        if res is not None:
+
+            try:
                 manufacter_name = res['results'][0]['openfda']['manufacturer_name'][0]
+            except:
+                print('Error!')
+            try:
                 precautions = str(res['results'][0]['precautions'][0])[:4999]
+            except:
+                print('Error!')
+            try:
                 drug_interactions = str(res['results'][0]['drug_interactions'][0])[:4999]
-                found = True
-            else:
-                attempt_num += 1
-                # You can probably use a logger to log the error here
-                time.sleep(2)  # Wait for 5 seconds before re-trying
+            except:
+                print('Error!')
 
-        if found is True:
             request.data.update({"manufacter_name": manufacter_name,
                                  'precautions': precautions,
-                                 'drug_interactions': drug_interactions}
-                                )
+                                 'drug_interactions': drug_interactions
+                                })
 
         serializer = DrugSerializer(data=request.data)
 
@@ -195,3 +197,26 @@ class MeasurementList(viewsets.ModelViewSet):
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def OpenFDAView(search_string, MAX_ATTEMPT=2):
+    """
+    Query the OpenFDA API for drugs records
+    """
+    base_uri = 'https://api.fda.gov:443/drug/label.json'
+    query_string = '%s?%s=%s&%s=%d' % (base_uri, 'search', search_string, 'limit', 1)
+
+    attempt_num = 0  # keep track of how many times we've retried
+    res = None
+    while attempt_num < MAX_ATTEMPT and res is None:
+        r = requests.get(
+            query_string,
+            timeout=10)
+        if r.status_code == 200:
+            res = r.json()
+        else:
+            attempt_num += 1
+            # You can probably use a logger to log the error here
+            time.sleep(2)  # Wait for 5 seconds before re-trying
+
+    return res
