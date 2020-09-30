@@ -129,4 +129,4 @@ class Prescription(ParanoidModel):
     note = models.CharField(max_length=200)
 
     def __str__(self):
-        return '%s - %s' % (self.patient.id, self.drug.name,)
+        return '%s - %s' % (self.patient.id, self.drug.generic_name,)
