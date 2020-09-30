@@ -86,7 +86,7 @@ class Measurement(ParanoidModel):
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return 'Measurement for patient id %d -> type: %s - value: %s' % (self.patient.id, self.type, self.value,)
+        return '[%s] Measurement for patient id %d -> type: %s - value: %s' % (self.date, self.patient.id, self.type, self.value,)
 
 
 class Disease(ParanoidModel):
@@ -129,7 +129,7 @@ class Prescription(ParanoidModel):
     note = models.CharField(max_length=200)
 
     def __str__(self):
-        return '%s - %s' % (self.patient.id, self.drug.generic_name,)
+        return '[%s] %s - %s' % (self.date, self.patient.id, self.drug.generic_name,)
 
 
 class Alert(ParanoidModel):
@@ -139,4 +139,4 @@ class Alert(ParanoidModel):
     message = models.CharField(max_length=2000)
 
     def __str__(self):
-        return '%s - %s' % (self.patient.id, self.level, )
+        return '[%s] %s - %s' % (self.date, self.patient.id, self.level, )
