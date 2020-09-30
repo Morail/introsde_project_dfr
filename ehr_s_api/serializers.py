@@ -1,6 +1,6 @@
 # serializers.py'id'
 from rest_framework import serializers
-from .models import Patient, PatientDisease, Drug, Prescription, Disease, Measurement
+from .models import Patient, PatientDisease, Drug, Prescription, Disease, Measurement, Alert
 
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -51,3 +51,13 @@ class PatientDiseaseSerializer(serializers.ModelSerializer):
         self.fields['patient'] = PatientSerializer(read_only=True)
         self.fields['disease'] = DiseaseSerializer(read_only=True)
         return super(PatientDiseaseSerializer, self).to_representation(instance)
+
+
+class AlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Alert
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        self.fields['patient'] = PatientSerializer(read_only=True)
+        return super(AlertSerializer, self).to_representation(instance)

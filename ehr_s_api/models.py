@@ -111,7 +111,7 @@ class Drug(ParanoidModel):
     generic_name = models.CharField(max_length=60)
     substance_name = models.CharField(max_length=60)
     product_type = models.CharField(max_length=60)
-    brand_name = models.CharField(max_length=60)
+    brand_name = models.CharField(max_length=100)
     dosage_form = models.CharField(max_length=60)
     drug_interactions = models.TextField(blank=True, null=True, max_length=5000)
     precautions = models.TextField(blank=True, null=True, max_length=5000)
@@ -130,3 +130,13 @@ class Prescription(ParanoidModel):
 
     def __str__(self):
         return '%s - %s' % (self.patient.id, self.drug.generic_name,)
+
+
+class Alert(ParanoidModel):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=timezone.now)
+    level = models.CharField(max_length=2000, null=True, default='INFO')
+    message = models.CharField(max_length=2000)
+
+    def __str__(self):
+        return '%s - %s' % (self.patient.id, self.level, )

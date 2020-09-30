@@ -11,6 +11,7 @@ router.register(r'drugs', views.DrugList, basename='Drug')
 router.register(r'prescriptions', views.PrescriptionList, basename='Prescription')
 router.register(r'patient_diseases', views.PatientDiseaseList, basename='Patient diseases')
 router.register(r'measurements', views.MeasurementList, basename='Measurement')
+router.register(r'alerts', views.AlertList, basename='Alert')
 
 urlpatterns = [
     path('v1/', include(router.urls)),

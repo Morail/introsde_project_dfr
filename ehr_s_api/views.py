@@ -65,6 +65,14 @@ class PrescriptionList(viewsets.ModelViewSet):
     serializer_class = PrescriptionSerializer
 
 
+class AlertList(viewsets.ModelViewSet):
+    """
+    Return a list of all the existing alerts.
+    """
+    queryset = Alert.objects.all().order_by('id')
+    serializer_class = AlertSerializer
+
+
 class DrugList(viewsets.ModelViewSet):
     """
     Return a list of all the existing drugs.
