@@ -99,29 +99,19 @@ class DrugList(viewsets.ModelViewSet):
         Returns a list of all the measurements for the given user
         """
         drug = self.get_object()
-        base_uri = 'https://api.fda.gov:443/drug/label.json'
         search_string = 'openfda.generic_name:"' + drug.substance_name + '"+AND+openfda.brand_name:"' + drug.brand_name + '"'
-        query_string = '%s?%s=%s&%s=%d' % (base_uri, 'search', search_string, 'limit', 1)
+        res = OpenFDAView(search_string)
 
-        attempt_num = 0  # keep track of how many times we've retried
-        while attempt_num < 2:
-            r = requests.get(
-                query_string,
-                timeout=10)
-            if r.status_code == 200:
-                data = r.json()
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                attempt_num += 1
-                # You can probably use a logger to log the error here
-                time.sleep(5)  # Wait for 5 seconds before re-trying
-        return Response({"error": "Request failed - " + query_string}, status=r.status_code)
+        if res is not None:
+            return Response(res, status=status.HTTP_200_OK)
+
+        return Response({"error": "Request failed"}, status=status.HTTP_400_BAD_REQUEST)
+
 
     def create(self, request, format=None):
 
         search_string = 'openfda.generic_name:"' + request.data.get(
             'substance_name') + '"+AND+openfda.brand_name:"' + request.data.get('brand_name') + '"'
-
         res = OpenFDAView(search_string)
 
         manufacter_name = ""
